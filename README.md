@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/145747919.svg)](https://zenodo.org/badge/latestdoi/145747919)
+
 ## Description
 
 **ASARapi** is a simple Python command-line program that allows you to search the [ESA Online Catalogue](http://esar-ds.eo.esa.int/sxcat) for SAR images produced by the [ERS-1](https://earth.esa.int/web/sppa/mission-performance/esa-missions/ers-1) (1991-2000), [ERS-2](https://earth.esa.int/web/sppa/mission-performance/esa-missions/ers-2) (1995-2011), or [Envisat](https://earth.esa.int/web/sppa/mission-performance/esa-missions/envisat) (2002-2012) satellites and to download them.
