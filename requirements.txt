@@ -1,0 +1,7 @@
+requests
+click
+pandas
+tqdm
+shapely
+appdirs
+bs4
