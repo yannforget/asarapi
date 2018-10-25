@@ -72,10 +72,12 @@ def _dl_url(product_id):
     return url
 
 
-def _dl_file(session, url, outdir):
+def _dl_file(session, url, outdir, override=False):
     """Download file from URL."""
     r = session.get(url, stream=True)
     filename = r.headers['Content-Disposition'].split('"')[1::2][0]
+    if os.path.isfile(os.path.join(outdir, filename)) and not override:
+        raise FileExistsError('%s already exists. Skipping...' % filename)
     length = int(r.headers['Content-Length'])
     progress = tqdm(total=length, unit='B', unit_scale=True)
     outfile = os.path.join(outdir, filename)
@@ -87,7 +89,7 @@ def _dl_file(session, url, outdir):
     progress.close()
 
 
-def request_download(session, product_id, outdir):
+def request_download(session, product_id, outdir, override=False):
     """Request download to ESA and interpret the response."""
     product_url = _dl_url(product_id)
     r = session.get(product_url, stream=True)
@@ -112,7 +114,7 @@ def request_download(session, product_id, outdir):
             sleep(1)
             progress.update(1)
         progress.close()
-        request_download(session, product_id, outdir)
+        request_download(session, product_id, outdir, override=override)
     
     # Product is directly available
     if r.status_code == 200:
