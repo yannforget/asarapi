@@ -51,6 +51,7 @@ def _build_query(relation, area, start, end, platform,
            'AsText(geom) AS footprint '
            'FROM products '
            'WHERE {relation}(geom, GeomFromText("{area}", 4326)) '
+           'AND Area(geom) < 10 '
            'AND date BETWEEN {start} AND {end} ')
     sql = sql.format(relation=relation, area=area, start=start, end=end)
 
