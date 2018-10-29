@@ -72,24 +72,28 @@ def _dl_url(product_id):
     return url
 
 
-def _dl_file(session, url, outdir, override=False):
+def _dl_file(session, url, outdir, override=False, progressbar=False):
     """Download file from URL."""
     r = session.get(url, stream=True)
     filename = r.headers['Content-Disposition'].split('"')[1::2][0]
     if os.path.isfile(os.path.join(outdir, filename)) and not override:
         raise FileExistsError('%s already exists. Skipping...' % filename)
     length = int(r.headers['Content-Length'])
-    progress = tqdm(total=length, unit='B', unit_scale=True)
+    if progressbar:
+        progress = tqdm(total=length, unit='B', unit_scale=True)
     outfile = os.path.join(outdir, filename)
     with open(outfile, 'wb') as f:
         for chunk in r.iter_content(chunk_size=1024*1024):
             if chunk:
                 f.write(chunk)
-                progress.update(1024*1024)
-    progress.close()
+                if progressbar:
+                    progress.update(1024*1024)
+    if progressbar:
+        progress.close()
 
 
-def request_download(session, product_id, outdir, override=False):
+def request_download(session, product_id, outdir, override=False,
+                     progressbar=False):
     """Request download to ESA and interpret the response."""
     product_url = _dl_url(product_id)
     r = session.get(product_url, stream=True)
@@ -107,15 +111,19 @@ def request_download(session, product_id, outdir, override=False):
         # Resend query to get correct "Retry-After" header value
         r = session.get(product_url, stream=True)
         retry_after = int(r.headers['Retry-After'])
-        print('The order is being processed by ESA '
-              'and will be ready in {} seconds.'.format(retry_after))
-        progress = tqdm(total=retry_after)
+        if progressbar:
+            print('The order is being processed by ESA '
+                'and will be ready in {} seconds.'.format(retry_after))
+            progress = tqdm(total=retry_after)
         for i in range(retry_after):
             sleep(1)
-            progress.update(1)
-        progress.close()
-        request_download(session, product_id, outdir, override=override)
+            if progressbar:
+                progress.update(1)
+        if progressbar:
+            progress.close()
+        request_download(session, product_id, outdir, override=override,
+                         progressbar=progressbar)
     
     # Product is directly available
     if r.status_code == 200:
-        _dl_file(session, product_url, outdir)
+        _dl_file(session, product_url, outdir, progressbar=progressbar)
