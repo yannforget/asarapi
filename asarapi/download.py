@@ -75,7 +75,7 @@ def _dl_url(product_id):
 def _dl_file(session, url, outdir, override=False, progressbar=False):
     """Download file from URL."""
     r = session.get(url, stream=True)
-    filename = r.headers['Content-Disposition'].split('"')[1::2][0]
+    filename = url.split('/')[-1]
     if os.path.isfile(os.path.join(outdir, filename)) and not override:
         raise FileExistsError('%s already exists. Skipping...' % filename)
     length = int(r.headers['Content-Length'])
